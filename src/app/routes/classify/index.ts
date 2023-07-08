@@ -43,24 +43,27 @@ const classifyRouter = Router();
  *                   items:
  *                     type: "string"
  */
-classifyRouter.post("/", async (req, res) => {
-  const body = z
-    .object({
-      text: z.string(),
-      tags: z
-        .array(
-          z.object({
-            name: z.string(),
-            description: z.string(),
-          })
-        )
-        .min(1),
-    })
-    .parse(req.body);
+classifyRouter.post("/", async (req, res, next) => {
+  try {
+    const body = z
+      .object({
+        text: z.string(),
+        tags: z
+          .array(
+            z.object({
+              name: z.string(),
+              description: z.string(),
+            })
+          )
+          .min(1),
+      })
+      .parse(req.body);
 
-  const tags = await classify(body);
-
-  res.json({ tags });
+    const tags = await classify(body);
+    res.json({ tags });
+  } catch (error) {
+    next(error);
+  }
 });
 
 export default classifyRouter;
