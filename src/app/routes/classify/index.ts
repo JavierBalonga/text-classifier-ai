@@ -18,19 +18,18 @@ const classifyRouter = Router();
  *             properties:
  *               text:
  *                 type: "string"
- *                 example: "Lorem ipsum dolor sit amet, consectetur adipiscing elit ..."
+ *                 example: "javascript it's a programming language"
  *               tags:
  *                 type: "array"
+ *                 example: [{"name": "javascript"},{"name": "dogs"}]
  *                 minItems: 1
  *                 items:
  *                   type: "object"
  *                   properties:
  *                     name:
  *                       type: "string"
- *                       example: "Lorem"
  *                     description:
  *                       type: "string"
- *                       example: "Its a example tag, dont use it"
  *     responses:
  *       200:
  *         content:
@@ -51,8 +50,10 @@ classifyRouter.post("/", async (req, res, next) => {
         tags: z
           .array(
             z.object({
-              name: z.string(),
-              description: z.string(),
+              name: z.string().refine((name) => !name.includes(","), {
+                message: "Tags names cannot contain ','",
+              }),
+              description: z.string().optional(),
             })
           )
           .min(1),

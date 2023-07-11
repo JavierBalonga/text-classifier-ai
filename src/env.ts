@@ -5,6 +5,7 @@ dotenv.config();
 
 const envSchema = z.object({
   PORT: z.number().default(3001),
+  OPENAI_API_KEY: z.string().nonempty(),
 });
 
 let env: z.infer<typeof envSchema>;
