@@ -60,8 +60,7 @@ classifyRouter.post("/", async (req, res, next) => {
       })
       .parse(req.body);
 
-    const tags = await classify(body);
-    res.json({ tags });
+    res.json(await classify(body));
   } catch (error) {
     next(error);
   }
