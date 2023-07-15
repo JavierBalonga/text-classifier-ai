@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@auth0/auth0-react": "^2.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "tailwind-merge": "^1.13.2"
+    "tailwind-merge": "^1.13.2",
+    "yup": "^1.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.14",

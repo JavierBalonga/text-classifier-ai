@@ -1,5 +1,6 @@
-import { Router } from "express";
+import { NextFunction, Request, Response, Router } from "express";
 import { z } from "zod";
+import authMiddleware from "../../middlewares/auth";
 import { classify } from "../../controller/classify";
 
 const classifyRouter = Router();
@@ -42,28 +43,32 @@ const classifyRouter = Router();
  *                   items:
  *                     type: "string"
  */
-classifyRouter.post("/", async (req, res, next) => {
-  try {
-    const body = z
-      .object({
-        text: z.string(),
-        tags: z
-          .array(
-            z.object({
-              name: z.string().refine((name) => !name.includes(","), {
-                message: "Tags names cannot contain ','",
-              }),
-              description: z.string().optional(),
-            })
-          )
-          .min(1),
-      })
-      .parse(req.body);
+classifyRouter.post(
+  "/",
+  authMiddleware("run:classify"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const body = z
+        .object({
+          text: z.string(),
+          tags: z
+            .array(
+              z.object({
+                name: z.string().refine((name) => !name.includes(","), {
+                  message: "Tags names cannot contain ','",
+                }),
+                description: z.string().optional(),
+              })
+            )
+            .min(1),
+        })
+        .parse(req.body);
 
-    res.json(await classify(body));
-  } catch (error) {
-    next(error);
+      res.json(await classify(body));
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 export default classifyRouter;
