@@ -21,7 +21,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       authorizationParams={{
         redirect_uri: window.location.origin,
         audience: VITE_APP_AUTH0_AUDIENCE,
-        scope: "run:classify",
+        scope: "openid profile email run:classify",
       }}
     >
       {children}
