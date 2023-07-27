@@ -1,5 +1,6 @@
 import { MouseEvent, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthProvider';
+import Alert from '../../abstract/Alert';
 import Button from '../../abstract/Button';
 import ClassifiedText from './ClassifiedText';
 import RegisterModal from './RegisterModal';
@@ -11,7 +12,7 @@ export default function TextClassifyForm() {
   const { isAuthenticated } = useAuth();
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
   const store = useStore();
-  const [fetchClassify, { loading }] = useClassify();
+  const [fetchClassify, { loading, error }] = useClassify();
   const [text, setText] = useState('');
 
   const resultsContainerRef = useRef<HTMLDivElement>(null);
@@ -106,7 +107,7 @@ export default function TextClassifyForm() {
               onDelete={(e) => handleDeleteResult(e, result.id)}
             />
           ))}
-          {loading && <ClassifiedText loading />}
+          {error ? <Alert error={error} /> : loading ? <ClassifiedText loading /> : null}
         </div>
 
         <textarea
