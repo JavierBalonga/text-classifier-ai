@@ -3,12 +3,31 @@ import { persist } from 'zustand/middleware';
 import { ClassifiedTextResult, Tag } from './types';
 
 interface Store {
-  tagsIndex: number;
-  tags: Tag[];
-  addTag: (tag: Omit<Tag, 'id'>) => void;
-  removeTag: (id: number) => void;
-  updateTag: (id: number, tag: Partial<Omit<Tag, 'id'>>) => void;
+  // Form state
+  form: {
+    values: {
+      text: string;
+      tags: { name: string; description: string }[];
+    };
+    errors: {
+      text?: string;
+      tags: { name?: string; description?: string }[];
+    };
+    touched: {
+      text: boolean;
+      tags: { name: boolean; description: boolean }[];
+    };
+  };
+  changeText: (text: string) => void;
+  touchText: () => void;
+  changeTagName: (index: number, name: string) => void;
+  touchTagName: (index: number) => void;
+  changeTagDescription: (index: number, description: string) => void;
+  touchTagDescription: (index: number) => void;
+  addTag: () => void;
+  removeTag: (index: number) => void;
 
+  // Results state
   resultsIndex: number;
   results: ClassifiedTextResult[];
   addResult: (result: Omit<ClassifiedTextResult, 'id'>) => void;
@@ -18,20 +37,149 @@ interface Store {
 const useStore = create(
   persist<Store>(
     (set) => ({
-      tagsIndex: 1,
-      tags: [],
-      addTag: (tag) => {
+      form: {
+        values: {
+          text: '',
+          tags: [],
+        },
+        errors: {
+          text: undefined,
+          tags: [],
+        },
+        touched: {
+          text: false,
+          tags: [],
+        },
+      },
+      changeText: (text: string) => {
+        let textError: string | undefined;
+        if (text.length < 5) {
+          textError = 'Text must be at least 5 characters';
+        } else if (text.length > 250) {
+          textError = 'Text must be less than 250 characters';
+        }
         set((state) => ({
-          tags: state.tags.concat({ ...tag, id: state.tagsIndex }),
-          tagsIndex: state.tagsIndex + 1,
+          form: {
+            ...state.form,
+            values: { ...state.form.values, text },
+            errors: { ...state.form.errors, text: textError },
+          },
         }));
       },
-      removeTag: (id) => {
-        set((state) => ({ tags: state.tags.filter((tag) => tag.id !== id) }));
-      },
-      updateTag: (id, tag) => {
+      touchText: () => {
         set((state) => ({
-          tags: state.tags.map((t) => (t.id === id ? { ...t, ...tag } : t)),
+          form: {
+            ...state.form,
+            touched: { ...state.form.touched, text: true },
+          },
+        }));
+      },
+      addTag: () => {
+        set((state) => ({
+          form: {
+            ...state.form,
+            values: {
+              ...state.form.values,
+              tags: state.form.values.tags.concat({ name: '', description: '' }),
+            },
+            errors: {
+              ...state.form.errors,
+              tags: state.form.errors.tags.concat({ name: undefined, description: undefined }),
+            },
+            touched: {
+              ...state.form.touched,
+              tags: state.form.touched.tags.concat({ name: false, description: false }),
+            },
+          },
+        }));
+      },
+      changeTagName: (index: number, name: string) => {
+        let tagNameError: string | undefined;
+        if (name.length > 25) {
+          tagNameError = 'Tag name must be less than 25 characters';
+        }
+        set((state) => ({
+          form: {
+            ...state.form,
+            values: {
+              ...state.form.values,
+              tags: state.form.values.tags.map((tag, i) => (i === index ? { ...tag, name } : tag)),
+            },
+            errors: {
+              ...state.form.errors,
+              tags: state.form.errors.tags.map((tag, i) =>
+                i === index ? { ...tag, name: tagNameError } : tag,
+              ),
+            },
+          },
+        }));
+      },
+      touchTagName: (index: number) => {
+        set((state) => ({
+          form: {
+            ...state.form,
+            touched: {
+              ...state.form.touched,
+              tags: state.form.touched.tags.map((tag, i) =>
+                i === index ? { ...tag, name: true } : tag,
+              ),
+            },
+          },
+        }));
+      },
+      changeTagDescription: (index: number, description: string) => {
+        let tagdescriptionError: string | undefined;
+        if (description.length > 150) {
+          tagdescriptionError = 'Tag name must be less than 150 characters';
+        }
+        set((state) => ({
+          form: {
+            ...state.form,
+            values: {
+              ...state.form.values,
+              tags: state.form.values.tags.map((tag, i) =>
+                i === index ? { ...tag, description } : tag,
+              ),
+            },
+            errors: {
+              ...state.form.errors,
+              tags: state.form.errors.tags.map((tag, i) =>
+                i === index ? { ...tag, description: tagdescriptionError } : tag,
+              ),
+            },
+          },
+        }));
+      },
+      touchTagDescription: (index: number) => {
+        set((state) => ({
+          form: {
+            ...state.form,
+            touched: {
+              ...state.form.touched,
+              tags: state.form.touched.tags.map((tag, i) =>
+                i === index ? { ...tag, description: true } : tag,
+              ),
+            },
+          },
+        }));
+      },
+      removeTag: (index: number) => {
+        set((state) => ({
+          form: {
+            ...state.form,
+            values: {
+              ...state.form.values,
+              tags: state.form.values.tags.filter((_, i) => i !== index),
+            },
+            errors: {
+              ...state.form.errors,
+              tags: state.form.errors.tags.filter((_, i) => i !== index),
+            },
+            touched: {
+              ...state.form.touched,
+              tags: state.form.touched.tags.filter((_, i) => i !== index),
+            },
+          },
         }));
       },
 

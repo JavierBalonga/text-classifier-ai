@@ -6,7 +6,10 @@ export interface ButtonProps extends ComponentProps<'button'> {}
 export default function Button({ children, className, ...props }: ButtonProps) {
   return (
     <button
-      className={twMerge('flex justify-center rounded-lg bg-indigo-400 px-6 py-2', className)}
+      className={twMerge(
+        'flex justify-center rounded-lg bg-indigo-400 px-6 py-2 disabled:opacity-50',
+        className,
+      )}
       {...props}
     >
       {children}

@@ -50,17 +50,40 @@ classifyRouter.post(
     try {
       const body = z
         .object({
-          text: z.string(),
+          text: z
+            .string()
+            .min(5, {
+              message: "the 'text' must have at least '5' characters",
+            })
+            .max(250, {
+              message: "the 'text' must not exceed '250' characters",
+            }),
           tags: z
             .array(
               z.object({
-                name: z.string().refine((name) => !name.includes(","), {
-                  message: "Tags names cannot contain ','",
-                }),
-                description: z.string().optional(),
+                name: z
+                  .string()
+                  .max(25, {
+                    message: "the 'name' must not exceed '25' characters",
+                  })
+                  .refine((name) => !name.includes(","), {
+                    message: "Tags names cannot contain ','",
+                  }),
+                description: z
+                  .string()
+                  .max(150, {
+                    message:
+                      "the 'description' must not exceed '150' characters",
+                  })
+                  .optional(),
               })
             )
-            .min(1),
+            .min(1, {
+              message: "the 'tags' must have at least '1' tag",
+            })
+            .max(15, {
+              message: "the 'tags' must not exceed '15' tags",
+            }),
         })
         .parse(req.body);
 

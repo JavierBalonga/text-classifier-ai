@@ -8,7 +8,6 @@ export interface RegisterModalProps {
 }
 
 export default function RegisterModal({ open, onClose }: RegisterModalProps) {
-  console.log('RegisterModal', open);
   const { loginWithRedirect } = useAuth();
 
   return (

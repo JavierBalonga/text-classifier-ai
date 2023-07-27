@@ -1,7 +1,9 @@
-import { MouseEvent, useEffect, useRef, useState } from 'react';
+import { MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthProvider';
 import Alert from '../../abstract/Alert';
 import Button from '../../abstract/Button';
+import ErrorMessage from '../../abstract/ErrorMessage';
+import Tooltip from '../../abstract/Tooltip';
 import ClassifiedText from './ClassifiedText';
 import RegisterModal from './RegisterModal';
 import TagField from './TagField';
@@ -13,7 +15,6 @@ export default function TextClassifyForm() {
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
   const store = useStore();
   const [fetchClassify, { loading, error }] = useClassify();
-  const [text, setText] = useState('');
 
   const resultsContainerRef = useRef<HTMLDivElement>(null);
   const prevLength = useRef(store.results.length);
@@ -30,31 +31,43 @@ export default function TextClassifyForm() {
 
   const handleAddTag = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    store.addTag({ name: '', description: '' });
+    store.addTag();
   };
 
   const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     fetchClassify({
-      text: text,
-      tags: store.tags.filter((tag) => tag.name.length > 0),
+      text: store.form.values.text,
+      tags: store.form.values.tags.filter((tag) => tag.name.length > 0),
     }).then((result) => {
-      store.addResult({ text, tags: result });
+      store.addResult({ text: store.form.values.text, tags: result });
     });
   };
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setText(e.target.value);
+    store.changeText(e.target.value);
   };
 
-  const handleTagNameChange = (e: React.ChangeEvent<HTMLInputElement>, id: number) => {
+  const handleTextBlur = () => {
+    store.touchText();
+  };
+
+  const handleTagNameChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const newName = e.target.value;
-    store.updateTag(id, { name: newName });
+    store.changeTagName(index, newName);
   };
 
-  const handleTagDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>, id: number) => {
+  const handleTagNameBlur = (index: number) => {
+    store.touchTagName(index);
+  };
+
+  const handleTagDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>, index: number) => {
     const newDescription = e.target.value;
-    store.updateTag(id, { description: newDescription });
+    store.changeTagDescription(index, newDescription);
+  };
+
+  const handleTagDescriptionBlur = (index: number) => {
+    store.touchTagDescription(index);
   };
 
   const handleDeleteTag = (e: MouseEvent<HTMLButtonElement>, id: number) => {
@@ -62,9 +75,9 @@ export default function TextClassifyForm() {
     store.removeTag(id);
   };
 
-  const handleDeleteResult = (e: MouseEvent<HTMLButtonElement>, id: number) => {
+  const handleDeleteResult = (e: MouseEvent<HTMLButtonElement>, index: number) => {
     e.preventDefault();
-    store.removeResult(id);
+    store.removeTag(index);
   };
 
   const handleOpenRegisteModal = (e: MouseEvent<HTMLButtonElement>) => {
@@ -76,18 +89,46 @@ export default function TextClassifyForm() {
     setRegisterModalOpen(false);
   };
 
+  const thereAreErrors = useMemo(() => {
+    return Boolean(
+      store.form.errors.text || store.form.errors.tags.some((tag) => tag.name || tag.description),
+    );
+  }, [store.form.errors]);
+
+  const someInputWasTouched = useMemo(() => {
+    return Boolean(
+      store.form.touched.text || store.form.touched.tags.some((tag) => tag.name || tag.description),
+    );
+  }, [store.form.touched]);
+
+  const everyInputHasValue = useMemo(() => {
+    return Boolean(
+      store.form.values.text &&
+        store.form.values.tags.length &&
+        store.form.values.tags.every((tag) => tag.name),
+    );
+  }, [store.form.values]);
+
   return (
     <div className="w-ful flex max-w-3xl grow flex-col gap-2 rounded-lg bg-slate-800 p-8 text-slate-200 sm:flex-row">
       <div className="flex w-full grow flex-col gap-2 sm:max-w-[230px]">
         <p>Tags:</p>
-        {store.tags.map((tag) => (
+        {store.form.values.tags.map((tag, index) => (
           <TagField
-            key={tag.id}
+            key={index}
             tagName={tag.name}
             tagDescription={tag.description}
-            onTagNameChange={(e) => handleTagNameChange(e, tag.id)}
-            onTagDescriptionChange={(e) => handleTagDescriptionChange(e, tag.id)}
-            onDelete={(e) => handleDeleteTag(e, tag.id)}
+            onTagNameChange={(e) => handleTagNameChange(e, index)}
+            onTagNameBlur={() => handleTagNameBlur(index)}
+            onTagDescriptionChange={(e) => handleTagDescriptionChange(e, index)}
+            onTagDescriptionBlur={() => handleTagDescriptionBlur(index)}
+            onDelete={(e) => handleDeleteTag(e, index)}
+            errorMessage={
+              (store.form.touched.tags[index].name && store.form.errors.tags[index]?.name) ||
+              (store.form.touched.tags[index].description &&
+                store.form.errors.tags[index]?.description) ||
+              undefined
+            }
           />
         ))}
         <Button className=" border-2 border-dashed bg-transparent" onClick={handleAddTag}>
@@ -112,12 +153,28 @@ export default function TextClassifyForm() {
 
         <textarea
           className="resize-none rounded-md border border-gray-400/20 bg-slate-800 p-2"
-          value={text}
+          value={store.form.values.text}
           onChange={handleTextChange}
+          onBlur={handleTextBlur}
         />
-        <Button onClick={isAuthenticated ? handleSubmit : handleOpenRegisteModal}>
-          Check Tags
-        </Button>
+        <ErrorMessage message={(store.form.touched.text && store.form.errors.text) || undefined} />
+        <Tooltip
+          title={
+            !someInputWasTouched || !everyInputHasValue
+              ? 'Please Complete all fields'
+              : thereAreErrors
+              ? 'Please fix the errors'
+              : undefined
+          }
+        >
+          <Button
+            onClick={isAuthenticated ? handleSubmit : handleOpenRegisteModal}
+            disabled={!someInputWasTouched || !everyInputHasValue || thereAreErrors}
+            className="w-full"
+          >
+            Check Tags
+          </Button>
+        </Tooltip>
         <RegisterModal open={registerModalOpen} onClose={handleCloseRegisteModal} />
       </div>
     </div>
