@@ -44,8 +44,20 @@ export default function TextClassifyForm() {
     });
   };
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const resizeTextarea = () => {
+    if (!textareaRef.current) return;
+    textareaRef.current.style.height = '1px';
+    textareaRef.current.style.height = textareaRef.current.scrollHeight + 2 + 'px';
+  };
+
+  useEffect(() => {
+    resizeTextarea();
+  }, [textareaRef]);
+
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     store.changeText(e.target.value);
+    resizeTextarea();
   };
 
   const handleTextBlur = () => {
@@ -152,10 +164,11 @@ export default function TextClassifyForm() {
         </div>
 
         <textarea
-          className="resize-none rounded-md border border-gray-400/20 bg-slate-800 p-2"
+          className="max-h-[136px] min-h-[66px] resize-none rounded-md border border-gray-400/20 bg-slate-800 p-2"
           value={store.form.values.text}
           onChange={handleTextChange}
           onBlur={handleTextBlur}
+          ref={textareaRef}
         />
         <ErrorMessage message={(store.form.touched.text && store.form.errors.text) || undefined} />
         <Tooltip

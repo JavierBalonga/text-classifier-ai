@@ -45,7 +45,7 @@ const classifyRouter = Router();
  */
 classifyRouter.post(
   "/",
-  authMiddleware("run:classify"),
+  authMiddleware(),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const body = z

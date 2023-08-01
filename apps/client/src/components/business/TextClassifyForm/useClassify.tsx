@@ -25,6 +25,8 @@ const useClassify = () => {
       setLoading(true);
       const promise = getAccessTokenSilently()
         .then((accessToken) => {
+          console.log('accessToken', accessToken);
+
           return fetch(`${VITE_APP_API_URL}/classify`, {
             method: 'POST',
             headers: {

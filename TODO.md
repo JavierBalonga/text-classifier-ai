@@ -1,7 +1,6 @@
 Obligatorio:
-- hacer que el textarea amuente su altura en funcion del texto
-- agreagr sistema de creditos
 - revisar estructura de componentes
+- agreagr sistema de creditos
 
 Opcional:
 - borrar todos
