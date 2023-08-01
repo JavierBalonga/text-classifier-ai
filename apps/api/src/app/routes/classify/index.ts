@@ -87,13 +87,6 @@ classifyRouter.post(
         })
         .parse(req.body);
 
-      // res.json(
-      //   body.tags.map((tag) => ({
-      //     name: tag.name,
-      //     confidence: Math.floor(Math.random() * 100),
-      //   }))
-      // );
-
       res.json(await classify(body));
     } catch (error) {
       next(error);

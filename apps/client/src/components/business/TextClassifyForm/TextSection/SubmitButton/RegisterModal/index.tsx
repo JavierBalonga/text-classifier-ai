@@ -1,6 +1,6 @@
 import { twMerge } from 'tailwind-merge';
-import { useAuth } from '../../../../contexts/AuthProvider';
-import Button from '../../../abstract/Button';
+import { useAuth } from '../../../../../../contexts/AuthProvider';
+import Button from '../../../../../abstract/Button';
 
 export interface RegisterModalProps {
   open: boolean;

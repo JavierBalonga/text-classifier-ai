@@ -1,6 +1,23 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { ClassifiedTextResult, Tag } from './types';
+
+export interface ClassifySuccessResult {
+  text: string;
+  tags: {
+    name: string;
+    confidence: number;
+  }[];
+}
+
+export interface ClassifyLoadingResult {
+  loading: true;
+}
+
+export interface ClassifyErrorResult {
+  error: unknown;
+}
+
+export type ClassifyResult = ClassifySuccessResult | ClassifyLoadingResult | ClassifyErrorResult;
 
 interface Store {
   // Form state
@@ -28,10 +45,10 @@ interface Store {
   removeTag: (index: number) => void;
 
   // Results state
-  resultsIndex: number;
-  results: ClassifiedTextResult[];
-  addResult: (result: Omit<ClassifiedTextResult, 'id'>) => void;
-  removeResult: (id: number) => void;
+  results: ClassifyResult[];
+  addResult: (result: ClassifyResult) => void;
+  setResult: (index: number, result: ClassifyResult) => void;
+  removeResult: (index: number) => void;
 }
 
 const useStore = create(
@@ -130,7 +147,7 @@ const useStore = create(
       changeTagDescription: (index: number, description: string) => {
         let tagdescriptionError: string | undefined;
         if (description.length > 150) {
-          tagdescriptionError = 'Tag name must be less than 150 characters';
+          tagdescriptionError = 'Tag Description must be less than 150 characters';
         }
         set((state) => ({
           form: {
@@ -183,16 +200,19 @@ const useStore = create(
         }));
       },
 
-      resultsIndex: 1,
       results: [],
       addResult: (result) => {
         set((state) => ({
-          results: state.results.concat({ ...result, id: state.resultsIndex }),
-          resultsIndex: state.resultsIndex + 1,
+          results: state.results.concat(result),
         }));
       },
-      removeResult: (id) => {
-        set((state) => ({ results: state.results.filter((result) => result.id !== id) }));
+      setResult: (index, result) => {
+        set((state) => ({
+          results: state.results.map((r, i) => (i === index ? result : r)),
+        }));
+      },
+      removeResult: (index) => {
+        set((state) => ({ results: state.results.filter((_, i) => i !== index) }));
       },
     }),
     { name: 'text-classifier-ai' },
@@ -200,3 +220,20 @@ const useStore = create(
 );
 
 export default useStore;
+
+export function isClassifySuccessResult(result: ClassifyResult): result is ClassifySuccessResult {
+  return (
+    'text' in result &&
+    'tags' in result &&
+    Array.isArray(result.tags) &&
+    result.tags.every((tag) => 'name' in tag && 'confidence' in tag)
+  );
+}
+
+export function isClassifyLoadingResult(result: ClassifyResult): result is ClassifyLoadingResult {
+  return 'loading' in result;
+}
+
+export function isClassifyErrorResult(result: ClassifyResult): result is ClassifyErrorResult {
+  return 'error' in result;
+}

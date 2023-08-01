@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
-import { useAuth } from '../../../contexts/AuthProvider';
-import env from '../../../env';
+import { useAuth } from '../../../../../contexts/AuthProvider';
+import env from '../../../../../env';
 
 const { VITE_APP_API_URL } = env;
 
@@ -25,8 +25,6 @@ const useClassify = () => {
       setLoading(true);
       const promise = getAccessTokenSilently()
         .then((accessToken) => {
-          console.log('accessToken', accessToken);
-
           return fetch(`${VITE_APP_API_URL}/classify`, {
             method: 'POST',
             headers: {

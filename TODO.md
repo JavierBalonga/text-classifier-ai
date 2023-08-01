@@ -1,10 +1,8 @@
 Obligatorio:
-- revisar estructura de componentes
-- agreagr sistema de creditos
+- agreagar sistema de creditos
 
 Opcional:
 - borrar todos
-
 
 # Calculo de Costos
 Maximos tokens por request aprox 1,679
