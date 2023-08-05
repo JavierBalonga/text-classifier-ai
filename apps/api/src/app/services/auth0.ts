@@ -57,7 +57,10 @@ interface Auth0User {
   last_login: string;
   logins_count: number;
   user_metadata: Record<string, unknown>;
-  app_metadata: Record<string, unknown>;
+  app_metadata: {
+    credits?: number;
+    last_claim_datetime?: string;
+  };
 }
 
 export async function getAuth0User(userId: string) {
