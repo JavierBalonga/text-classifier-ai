@@ -6,8 +6,8 @@ import { PromptTemplate } from "langchain/prompts";
 const model = new OpenAI({
   modelName: "gpt-3.5-turbo",
   maxRetries: 1,
+  maxConcurrency: 1,
   temperature: 0,
-  verbose: true,
 });
 
 const prompt =

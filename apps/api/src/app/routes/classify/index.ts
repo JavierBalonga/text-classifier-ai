@@ -95,9 +95,8 @@ classifyRouter.post(
       if (!userId)
         return next(new ServerError({ status: 401, message: "Unauthorized" }));
       const auth0User = await getAuth0User(userId);
-      const { credits } = auth0User?.app_metadata;
-      console.log(`credits: ${credits}`);
-      if (!credits || credits < 1) {
+      const { credits = 0 } = auth0User.app_metadata;
+      if (credits < 1) {
         return next(
           new ServerError({
             status: 402,
@@ -107,14 +106,14 @@ classifyRouter.post(
       }
       await patchAuth0User(userId, { app_metadata: { credits: credits - 1 } });
 
-      res.json(
-        body.tags.map((tag) => ({
-          ...tag,
-          confidence: Math.round(Math.random() * 100),
-        }))
-      );
+      // res.json(
+      //   body.tags.map((tag) => ({
+      //     ...tag,
+      //     confidence: Math.round(Math.random() * 100),
+      //   }))
+      // );
 
-      // res.json(await classify(body));
+      res.json(await classify(body));
     } catch (error) {
       next(error);
     }
