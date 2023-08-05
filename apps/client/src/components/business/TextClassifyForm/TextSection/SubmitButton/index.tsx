@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useAuth } from '../../../../../contexts/AuthProvider';
 import Button from '../../../../abstract/Button';
 import Tooltip from '../../../../abstract/Tooltip';
-import useStore from '../../useStore';
+import useStore, { isClassifyLoadingResult } from '../../useStore';
 import RegisterModal from './RegisterModal';
 import useClassify from './useClassify';
 
@@ -56,6 +56,10 @@ export default function SubmitButton() {
     );
   }, [form.values]);
 
+  const isLoading = useMemo(() => {
+    return results.some((result) => isClassifyLoadingResult(result));
+  }, [results]);
+
   return (
     <>
       <Tooltip
@@ -64,12 +68,14 @@ export default function SubmitButton() {
             ? 'Please Complete all fields'
             : thereAreErrors
             ? 'Please fix the errors'
+            : isLoading
+            ? 'There is already a request in progress'
             : undefined
         }
       >
         <Button
           onClick={isAuthenticated ? handleSubmit : handleOpenRegisteModal}
-          disabled={!someInputWasTouched || !everyInputHasValue || thereAreErrors}
+          disabled={!someInputWasTouched || !everyInputHasValue || thereAreErrors || isLoading}
           className="w-full"
         >
           Check Tags

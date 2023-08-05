@@ -2,6 +2,9 @@ import { NextFunction, Request, Response, Router } from "express";
 import { z } from "zod";
 import authMiddleware from "../../middlewares/auth";
 import { classify } from "../../controller/classify";
+import { AuthRequest } from "../../../types";
+import { getAuth0User, patchAuth0User } from "../../services/auth0";
+import ServerError from "../../utils/ServerError";
 
 const classifyRouter = Router();
 
@@ -87,7 +90,31 @@ classifyRouter.post(
         })
         .parse(req.body);
 
-      res.json(await classify(body));
+      const auth = (req as unknown as AuthRequest).auth;
+      const userId = auth?.payload.sub;
+      if (!userId)
+        return next(new ServerError({ status: 401, message: "Unauthorized" }));
+      const auth0User = await getAuth0User(userId);
+      const { credits } = auth0User?.app_metadata as { credits?: number };
+      console.log(`credits: ${credits}`);
+      if (!credits || credits < 1) {
+        return next(
+          new ServerError({
+            status: 402,
+            message: "You don't have enough credits",
+          })
+        );
+      }
+      await patchAuth0User(userId, { app_metadata: { credits: credits - 1 } });
+
+      res.json(
+        body.tags.map((tag) => ({
+          ...tag,
+          confidence: Math.round(Math.random() * 100),
+        }))
+      );
+
+      // res.json(await classify(body));
     } catch (error) {
       next(error);
     }

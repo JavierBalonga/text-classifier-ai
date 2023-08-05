@@ -7,6 +7,7 @@ const model = new OpenAI({
   modelName: "gpt-3.5-turbo",
   maxRetries: 1,
   temperature: 0,
+  verbose: true,
 });
 
 const prompt =
@@ -28,6 +29,7 @@ Array response:`);
 const chain = new LLMChain({
   llm: model,
   prompt: prompt,
+  verbose: true,
 });
 
 export interface classifyOptions {

@@ -8,6 +8,9 @@ const envSchema = z.object({
   OPENAI_API_KEY: z.string().nonempty(),
   AUTH0_AUDIENCE: z.string().nonempty(),
   AUTH0_ISSUER_BASE_URL: z.string().nonempty(),
+  AUTH0_TENANT_NAME: z.string().nonempty(),
+  AUTH0_CLIENT_ID: z.string().nonempty(),
+  AUTH0_CLIENT_SECRET: z.string().nonempty(),
 });
 
 let env: z.infer<typeof envSchema>;

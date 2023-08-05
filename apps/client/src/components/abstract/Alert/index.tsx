@@ -20,7 +20,18 @@ export default function Alert({ error, className, ...props }: AlertProps) {
         ? error.message
         : typeof error === 'string'
         ? error
+        : typeof error === 'object' &&
+          hasOwnProperty(error, 'message') &&
+          typeof error.message === 'string'
+        ? error.message
         : JSON.stringify(error)}
     </p>
   );
+}
+
+function hasOwnProperty<O extends object = object, P extends string = string>(
+  object: O,
+  property: P,
+): object is O & { [key in P]: unknown } {
+  return Object.prototype.hasOwnProperty.call(object, property);
 }

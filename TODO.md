@@ -1,5 +1,6 @@
 Obligatorio:
 - agreagar sistema de creditos
+- abstraer boton de borrar
 
 Opcional:
 - borrar todos
