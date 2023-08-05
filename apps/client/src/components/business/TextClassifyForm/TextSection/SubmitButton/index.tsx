@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useAuth } from '../../../../../contexts/AuthProvider';
+import { useCreditsContext } from '../../../../../contexts/CreditsContext';
 import Button from '../../../../abstract/Button';
 import Tooltip from '../../../../abstract/Tooltip';
 import useStore, { isClassifyLoadingResult } from '../../useStore';
@@ -8,6 +9,7 @@ import useClassify from './useClassify';
 
 export default function SubmitButton() {
   const { isAuthenticated } = useAuth();
+  const { refreshCredits } = useCreditsContext();
   const form = useStore((s) => s.form);
   const results = useStore((s) => s.results);
   const addResult = useStore((s) => s.addResult);
@@ -27,6 +29,9 @@ export default function SubmitButton() {
       })
       .catch((error) => {
         setResult(index, { error });
+      })
+      .finally(() => {
+        refreshCredits();
       });
   };
 
