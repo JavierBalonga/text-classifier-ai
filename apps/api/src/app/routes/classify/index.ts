@@ -132,8 +132,9 @@ classifyRouter.post(
           app_metadata: { credits: userCredits },
         });
       }
+    } finally {
+      currentRequests[userId] = false;
     }
-    currentRequests[userId] = false;
   }
 );
 
