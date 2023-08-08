@@ -3,15 +3,17 @@ import { twMerge } from 'tailwind-merge';
 
 export interface AlertProps extends Omit<ComponentProps<'p'>, 'children'> {
   error?: unknown;
+  size?: 'sm' | 'md';
 }
 
-export default function Alert({ error, className, ...props }: AlertProps) {
+export default function Alert({ error, className, size = 'md', ...props }: AlertProps) {
   if (!error) return null;
 
   return (
     <p
       className={twMerge(
-        'animate-fadein rounded-md border border-red-600 bg-red-600/25 p-4',
+        'animate-fadein rounded-md border border-red-600 bg-red-600/25',
+        size === 'sm' ? 'px-4 py-1 text-sm' : 'p-4 text-base',
         className,
       )}
       {...props}

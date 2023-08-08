@@ -35,6 +35,7 @@ export default function ClassifyResultComponent({ index }: ClassifiedTextProps) 
       </div>
     );
   } else if (isClassifyLoadingResult(result)) {
+    // TODO use skeleton
     return (
       <div className="flex animate-fadein flex-col gap-2 rounded-md bg-slate-700 p-4">
         <p className="animate-pulse break-words rounded-md border-2 border-zinc-400/25 bg-zinc-400/25 p-2 text-transparent">

@@ -1,9 +1,6 @@
 Obligatorio:
-- agreagar sistema de creditos
+- limitar uso de la api (un solo llamado en curso por usuario)
 - abstraer boton de borrar
-
-Opcional:
-- borrar todos
 
 # Calculo de Costos
 Maximos tokens por request aprox 1,679

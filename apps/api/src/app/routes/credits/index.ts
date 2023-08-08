@@ -32,10 +32,11 @@ creditsRouter.get(
   async (req: Request, res: Response, next: NextFunction) => {
     const auth = (req as unknown as AuthRequest).auth;
     const userId = auth?.payload.sub;
-    if (!userId)
+    if (!userId) {
       return next(new ServerError({ status: 401, message: "Unauthorized" }));
+    }
     const auth0User = await getAuth0User(userId);
-    const { credits = 0, last_claim_datetime } = auth0User?.app_metadata;
+    const { credits = 0, last_claim_datetime } = auth0User?.app_metadata || {};
     res.json({ credits, lastClaimDatetime: last_claim_datetime });
   }
 );
@@ -60,7 +61,7 @@ creditsRouter.get(
  *                 lastClaimDatetime:
  *                   type: "string"
  */
-creditsRouter.get(
+creditsRouter.post(
   "/",
   authMiddleware(),
   async (req: Request, res: Response, next: NextFunction) => {
@@ -70,7 +71,7 @@ creditsRouter.get(
       return next(new ServerError({ status: 401, message: "Unauthorized" }));
     }
     const auth0User = await getAuth0User(userId);
-    const { credits = 0, last_claim_datetime } = auth0User?.app_metadata;
+    const { credits = 0, last_claim_datetime } = auth0User?.app_metadata || {};
     if (
       last_claim_datetime &&
       new Date(last_claim_datetime).getFullYear() >= new Date().getFullYear() &&

@@ -95,7 +95,7 @@ classifyRouter.post(
       if (!userId)
         return next(new ServerError({ status: 401, message: "Unauthorized" }));
       const auth0User = await getAuth0User(userId);
-      const { credits = 0 } = auth0User.app_metadata;
+      const { credits = 0 } = auth0User.app_metadata || {};
       if (credits < 1) {
         return next(
           new ServerError({

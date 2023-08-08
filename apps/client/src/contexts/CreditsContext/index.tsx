@@ -32,8 +32,8 @@ export const CreditsContextProvider = ({ children }: CreditsContextProviderProps
       value={{
         credits: data?.credits,
         lastClaimDatetime: data?.lastClaimDatetime,
-        error,
-        loading,
+        error: error,
+        loading: loading,
         refreshCredits,
       }}
     >
