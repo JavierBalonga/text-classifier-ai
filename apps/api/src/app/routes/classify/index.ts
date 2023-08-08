@@ -8,6 +8,8 @@ import ServerError from "../../utils/ServerError";
 
 const classifyRouter = Router();
 
+const currentRequests: { [userId: string]: boolean } = {};
+
 /**
  * @openapi
  * /classify:
@@ -50,6 +52,23 @@ classifyRouter.post(
   "/",
   authMiddleware(),
   async (req: Request, res: Response, next: NextFunction) => {
+    const auth = (req as unknown as AuthRequest).auth;
+    const userId = auth?.payload.sub;
+    if (!userId) {
+      return next(new ServerError({ status: 401, message: "Unauthorized" }));
+    }
+    if (currentRequests[userId]) {
+      return next(
+        new ServerError({
+          status: 400,
+          message: "You already have a request in progress",
+        })
+      );
+    }
+    currentRequests[userId] = true;
+
+    let theCreditWasConsumed = false;
+    let userCredits = 0;
     try {
       const body = z
         .object({
@@ -90,13 +109,9 @@ classifyRouter.post(
         })
         .parse(req.body);
 
-      const auth = (req as unknown as AuthRequest).auth;
-      const userId = auth?.payload.sub;
-      if (!userId)
-        return next(new ServerError({ status: 401, message: "Unauthorized" }));
       const auth0User = await getAuth0User(userId);
-      const { credits = 0 } = auth0User.app_metadata || {};
-      if (credits < 1) {
+      userCredits = auth0User.app_metadata.credits || 0;
+      if (userCredits < 1) {
         return next(
           new ServerError({
             status: 402,
@@ -104,19 +119,21 @@ classifyRouter.post(
           })
         );
       }
-      await patchAuth0User(userId, { app_metadata: { credits: credits - 1 } });
-
-      // res.json(
-      //   body.tags.map((tag) => ({
-      //     ...tag,
-      //     confidence: Math.round(Math.random() * 100),
-      //   }))
-      // );
+      await patchAuth0User(userId, {
+        app_metadata: { credits: userCredits - 1 },
+      });
+      theCreditWasConsumed = true;
 
       res.json(await classify(body));
     } catch (error) {
       next(error);
+      if (theCreditWasConsumed) {
+        await patchAuth0User(userId, {
+          app_metadata: { credits: userCredits },
+        });
+      }
     }
+    currentRequests[userId] = false;
   }
 );
 

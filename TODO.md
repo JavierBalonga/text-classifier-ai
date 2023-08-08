@@ -1,6 +1,7 @@
 Obligatorio:
-- limitar uso de la api (un solo llamado en curso por usuario)
+- refactorear ruta de endpoint classify
 - abstraer boton de borrar
+
 
 # Calculo de Costos
 Maximos tokens por request aprox 1,679

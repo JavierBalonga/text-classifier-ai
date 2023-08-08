@@ -8,7 +8,7 @@ const model = new OpenAI({
   maxRetries: 1,
   maxConcurrency: 1,
   temperature: 0,
-  verbose: true,
+  cache: true,
 });
 
 const prompt =
